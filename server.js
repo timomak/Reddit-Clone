@@ -2,12 +2,14 @@ const express = require('express')
 const app = express()
 var bodyParser = require('body-parser');
 require('./controllers/posts.js')(app);
+var Post = require('./models/post');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-var Post = require('./models/post');
-
+app.get('/', (req, res) => {
+  res.render('home', {});
+})
 module.exports = (app) => {
 
   // CREATE
@@ -23,19 +25,6 @@ module.exports = (app) => {
   });
 
 };
-
-app.get('/', (req, res) => {
-  res.render('home', {});
-})
-
-app.post('/posts', (req, res) => {
-  Review.create(req.body).then((review) => {
-    console.log(review);
-    res.redirect('/');
-  }).catch((err) => {
-    console.log(err.message);
-  })
-})
 
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
