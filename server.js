@@ -1,16 +1,11 @@
-<<<<<<< HEAD
 // Required initializers
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-<<<<<<< HEAD
 //var Post = require('./models/post');
 var exphbs = require('express-handlebars');
 // require('./controllers/posts.js')(app);
-=======
-require('./controllers/posts.js')(app);
->>>>>>> parent of 92b6d3b... Error undefined in terminal
 
 // Set up
 mongoose.Promise = global.Promise;
@@ -22,21 +17,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 
-<<<<<<< HEAD
 const Post = mongoose.model('Post', {
   title: String
 });
-=======
-
-var Post = require('./models/post');
-
-module.exports = (app) => {
-
-  // CREATE
-  app.post('/posts', (req, res) => {
-    // INSTANTIATE INSTANCE OF POST MODEL
-    var post = new Post(req.body);
->>>>>>> parent of 92b6d3b... Error undefined in terminal
 
 // let posts = [
 //   { title: "Great Review" },
@@ -51,37 +34,8 @@ app.get('/', (req, res) => {
     console.log(err);
   })
 })
-=======
-const express = require('express')
-const app = express()
->>>>>>> parent of 4d35d41... Not working version.
 
-<<<<<<< HEAD
 // NEW
-=======
-app.get('/', (req, res) => {
-  res.render('home', {});
-})
-<<<<<<< HEAD
-
-app.post('/posts', (req, res) => {
-  Review.create(req.body).then((review) => {
-    console.log(review);
-    res.redirect('/');
-  }).catch((err) => {
-    console.log(err.message);
-  })
-})
-
->>>>>>> parent of 92b6d3b... Error undefined in terminal
 app.get('/posts/new', (req, res) => {
-  res.render('posts-new', {});
+  res.render('post-new', {});
 })
-=======
-app.listen(3000, () => console.log('Example app listening on port 3000!'))
-
-var exphbs = require('express-handlebars');
-
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
-app.set('view engine', 'handlebars');
->>>>>>> parent of 4d35d41... Not working version.
