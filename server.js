@@ -34,7 +34,11 @@ app.get('/', (req, res) => {
     console.log(err);
   })
 })
-
+// CREATE
+app.post('/posts', (req, res) => {
+  console.log(req.body);
+  // res.render('reviews-new', {});
+})
 // NEW
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
