@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Required initializers
 var express = require('express');
 var app = express();
@@ -50,6 +51,10 @@ app.get('/', (req, res) => {
     console.log(err);
   })
 })
+=======
+const express = require('express')
+const app = express()
+>>>>>>> parent of 4d35d41... Not working version.
 
 <<<<<<< HEAD
 // NEW
@@ -57,6 +62,7 @@ app.get('/', (req, res) => {
 app.get('/', (req, res) => {
   res.render('home', {});
 })
+<<<<<<< HEAD
 
 app.post('/posts', (req, res) => {
   Review.create(req.body).then((review) => {
@@ -71,3 +77,11 @@ app.post('/posts', (req, res) => {
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
 })
+=======
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
+
+var exphbs = require('express-handlebars');
+
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+>>>>>>> parent of 4d35d41... Not working version.
