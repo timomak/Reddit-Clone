@@ -1,38 +1,41 @@
-const express = require('express')
-const app = express()
+// Required initializers
+var express = require('express');
+var app = express();
+var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-require('./controllers/posts.js')(app);
-var Post = require('./models/post');
+//var Post = require('./models/post');
+var exphbs = require('express-handlebars');
+// require('./controllers/posts.js')(app);
 
-
+// Set up
+mongoose.Promise = global.Promise;
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+app.use(express.static('public'));
+mongoose.connect('mongodb://localhost:27017/reddit-clone', { useMongoClient: true });
+app.use(bodyParser.urlencoded({ extended: true }));
+app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const Post = mongoose.model('Post', {
+  title: String
+});
+
+// let posts = [
+//   { title: "Great Review" },
+//   { title: "Next Review" }
+// ]
+
+// INDEX
 app.get('/', (req, res) => {
-  res.render('home', {});
+  Post.find().then((posts) => {
+    res.render('post-index', { posts: posts});
+  }).catch((err) => {
+    console.log(err);
+  })
 })
-module.exports = (app) => {
 
-  // CREATE
-  app.post('/posts', (req, res) => {
-    // INSTANTIATE INSTANCE OF POST MODEL
-    var post = new Post(req.body);
-
-    // SAVE INSTANCE OF POST MODEL TO DB
-    post.save((err, post) => {
-      // REDIRECT TO THE ROOT
-      return res.redirect('/');
-    })
-  });
-
-};
-
+// NEW
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
 })
-
-app.listen(3000, () => console.log('Example app listening on port 3000!'))
-
-var exphbs = require('express-handlebars');
-
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
-app.set('view engine', 'handlebars');
