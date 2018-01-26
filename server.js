@@ -2,6 +2,7 @@
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 var bodyParser = require('body-parser');
 //var Post = require('./models/post');
 var exphbs = require('express-handlebars');
@@ -18,13 +19,27 @@ app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const Post = mongoose.model('Post', {
-  title: String
+  createdAt:  { type: Date },
+  updatedAt:  { type: Date },
+  title:      { type: String, required: true },
+  url:        { type: String, required: true },
+  summary:    { type: String, required: true }
 });
 
+Post.pre('save', (next) => {
+  // SET createdAt AND updatedAt
+  const now = new Date()
+  this.updatedAt = now
+  if (!this.createdAt) {
+    this.createdAt = now
+  }
+  next()
+})
 // let posts = [
 //   { title: "Great Review" },
 //   { title: "Next Review" }
 // ]
+
 
 // INDEX
 app.get('/', (req, res) => {
@@ -36,8 +51,12 @@ app.get('/', (req, res) => {
 })
 // CREATE
 app.post('/posts', (req, res) => {
-  console.log(req.body);
-  // res.render('reviews-new', {});
+  Post.create(req.body).then((post) => {
+    console.log(post);
+    res.redirect('/');
+  }).catch((err) => {
+    console.log(err.message);
+  })
 })
 // NEW
 app.get('/posts/new', (req, res) => {
