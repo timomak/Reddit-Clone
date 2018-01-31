@@ -26,19 +26,6 @@ Post.find({}).then((posts) => {
   console.log(err.message);
 })
 
-// module.exports = (app) => {
-//   // CREATE
-//   app.post('/posts', (req, res) => {
-//     // INSTANTIATE INSTANCE OF POST MODEL
-//     var post = new Post(req.body);
-//     // SAVE INSTANCE OF POST MODEL TO DB
-//     post.save((err, post) => {
-//       // REDIRECT TO THE ROOT
-//       return res.redirect('/');
-//     })
-//   });
-// };
-
 app.post('/posts', (req, res) => {
   Post.create(req.body).then((post) => {
     console.log(post);
@@ -55,6 +42,15 @@ app.get('/', (req, res) => {
   console.log(err);
 })
 })
+
+// SUBREDDIT
+app.get('/n/:subreddit', function(req, res) {
+  Post.find({ subreddit: req.params.subreddit }).then((posts) => {
+    res.render('post-index.handlebars', { posts })
+  }).catch((err) => {
+    console.log(err)
+  })
+});
 
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
