@@ -3,10 +3,13 @@ var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-
 var exphbs = require('express-handlebars');
+// POST
 require('./controllers/posts.js')(app);
 var Post = require('./models/post');
+// COMMENTS
+require('./controllers/comments-controller.js')(app);
+const Comment = require('./models/comment')
 
 // Set up
 mongoose.Promise = global.Promise;
@@ -46,7 +49,7 @@ app.get('/', (req, res) => {
 // SUBREDDIT
 app.get('/n/:subreddit', function(req, res) {
   Post.find({ subreddit: req.params.subreddit }).then((posts) => {
-    res.render('post-index.handlebars', { posts })
+    res.render('post-subreddit.handlebars', { posts })
   }).catch((err) => {
     console.log(err)
   })
@@ -57,10 +60,31 @@ app.get('/posts/new', (req, res) => {
 })
 
 app.get('/posts/:id', function (req, res) {
- // LOOK UP THE POST
  Post.findById(req.params.id).then((post) => {
    res.render('post-show.handlebars', { post })
  }).catch((err) => {
    console.log(err.message)
  })
 })
+// CREATE Comment
+app.post('/posts/:postId/comments', function (req, res) {
+  // INSTANTIATE INSTANCE OF MODEL
+  const comment = new Comment(req.body)
+  // SAVE INSTANCE OF Comment MODEL TO DB
+  comment.save().then((comment) => {
+    return Post.findById(req.params.postId)
+  }).then((post) => {
+    post.comments.unshift(comment)
+    return post.save()
+  }).then((post) => {
+    res.redirect(`/`)
+  }).catch((err) => {
+    console.log(err)
+  })
+})
+// // LOOK UP THE POST
+// Post.findById(req.params.id).populate('comments').then((post) => {
+//   res.render('post-show.hbs', { post })
+// }).catch((err) => {
+//   console.log(err.message)
+// })
