@@ -7,9 +7,9 @@ var exphbs = require('express-handlebars');
 // POST
 require('./controllers/posts.js')(app);
 var Post = require('./models/post');
-// COMMENTS
+// COMMENT
 require('./controllers/comments-controller.js')(app);
-const Comment = require('./models/comment')
+var Comment = require('./models/comment');
 
 // Set up
 mongoose.Promise = global.Promise;
@@ -58,7 +58,6 @@ app.get('/n/:subreddit', function(req, res) {
 app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
 })
-
 app.get('/posts/:id', function (req, res) {
  Post.findById(req.params.id).then((post) => {
    res.render('post-show.handlebars', { post })
@@ -66,25 +65,3 @@ app.get('/posts/:id', function (req, res) {
    console.log(err.message)
  })
 })
-// CREATE Comment
-app.post('/posts/:postId/comments', function (req, res) {
-  // INSTANTIATE INSTANCE OF MODEL
-  const comment = new Comment(req.body)
-  // SAVE INSTANCE OF Comment MODEL TO DB
-  comment.save().then((comment) => {
-    return Post.findById(req.params.postId)
-  }).then((post) => {
-    post.comments.unshift(comment)
-    return post.save()
-  }).then((post) => {
-    res.redirect(`/`)
-  }).catch((err) => {
-    console.log(err)
-  })
-})
-// // LOOK UP THE POST
-// Post.findById(req.params.id).populate('comments').then((post) => {
-//   res.render('post-show.hbs', { post })
-// }).catch((err) => {
-//   console.log(err.message)
-// })
