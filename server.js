@@ -59,9 +59,28 @@ app.get('/posts/new', (req, res) => {
   res.render('posts-new', {});
 })
 app.get('/posts/:id', function (req, res) {
- Post.findById(req.params.id).then((post) => {
-   res.render('post-show.handlebars', { post })
- }).catch((err) => {
-   console.log(err.message)
- })
+  // LOOK UP THE POST
+  Post.findById(req.params.id).populate('comments').then((post) => {
+    res.render('post-show.handlebars', { post})
+  }).catch((err) => {
+    console.log(err.message)
+  })
+})
+// CREATE Comment
+app.post('/posts/:postId/comments', function (req, res) {
+  // INSTANTIATE INSTANCE OF MODEL
+  const comment = new Comment(req.body)
+  // SAVE INSTANCE OF Comment MODEL TO DB
+  comment.save().then((comment) => {
+    return Post.findById(req.params.postId)
+  }).then((post) => {
+    post.comments.unshift(comment)
+    return post.save()
+  }).then((post) => {
+    res.redirect(`/`)
+  }).catch((err) => {
+    console.log(err)
+  })
+
+
 })
