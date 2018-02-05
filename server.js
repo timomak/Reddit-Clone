@@ -1,16 +1,25 @@
 // Required initializers
+var cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
+app.use(cookieParser());
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
+
 // POST
 require('./controllers/posts.js')(app);
 var Post = require('./models/post');
 // COMMENT
 require('./controllers/comments-controller.js')(app);
 var Comment = require('./models/comment');
+// // USER
+require('./controllers/auth.js')(app);
+var User = require('./models/user');
 
+// SECURITY
+require('dotenv').config();
 // Set up
 mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -41,6 +50,7 @@ app.post('/posts', (req, res) => {
 app.get('/', (req, res) => {
   Post.find().then((posts) => {
   res.render('post-index', { posts: posts});
+   console.log(req.cookies);
 }).catch((err) => {
   console.log(err);
 })
@@ -81,6 +91,18 @@ app.post('/posts/:postId/comments', function (req, res) {
   }).catch((err) => {
     console.log(err)
   })
-
-
 })
+// SIGN UP POST
+app.post('/sign-up', (req, res) => {
+  // Create User and JWT
+  const user = new User(req.body);
+
+  user.save().then((user) => {
+        var token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: "60 days" });
+        res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+        res.redirect('/');
+  }).catch((err) => {
+    console.log(err.message);
+    return res.status(400).send({ err: err });
+  });
+});
