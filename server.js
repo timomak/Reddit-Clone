@@ -1,12 +1,15 @@
+// SECURITY
+require('dotenv').config();
+
 // Required initializers
 var cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
-app.use(cookieParser());
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
+var bcrypt = require('bcrypt');
 
 // POST
 require('./controllers/posts.js')(app);
@@ -18,8 +21,7 @@ var Comment = require('./models/comment');
 require('./controllers/auth.js')(app);
 var User = require('./models/user');
 
-// SECURITY
-require('dotenv').config();
+
 // Set up
 mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
@@ -31,6 +33,7 @@ mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 Post.find({}).then((posts) => {
   res.render('posts-index.handlebars', { posts })
@@ -95,14 +98,55 @@ app.post('/posts/:postId/comments', function (req, res) {
 // SIGN UP POST
 app.post('/sign-up', (req, res) => {
   // Create User and JWT
-  const user = new User(req.body);
+  var user = new User(req.body);
 
   user.save().then((user) => {
-        var token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: "60 days" });
-        res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
-        res.redirect('/');
+      var token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: "60 days" });
+      res.cookie('AUSTEN WANTS De COOKIE', token, { maxAge: 900000, httpOnly: true });
+      res.redirect('/');
   }).catch((err) => {
-    console.log(err.message);
-    return res.status(400).send({ err: err });
+      console.log(err.message);
+      return res.status(400).send({ err: err });
+    });
+});
+
+// LOGOUT
+app.get('/logout', (req, res) => {
+  res.clearCookie('AUSTEN WANTS De COOKIE');
+  res.redirect('/');
+});
+
+// LOGIN FORM
+app.get('/login', (req, res) => {
+  res.render('login.handlebars');
+});
+
+// LOGIN
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  // Find this user name
+  User.findOne({ username }, 'username password').then((user) => {
+    if (!user) {
+      // User not found
+      return res.status(401).send({ message: 'Wrong Username or Password' });
+    }
+    // Check the password
+    user.comparePassword(password, (err, isMatch) => {
+      if (!isMatch) {
+        // Password does not match
+        return res.status(401).send({ message: "Wrong Username or password"});
+      }
+      // Create a token
+      const token = jwt.sign(
+        { _id: user._id, username: user.username }, process.env.SECRET,
+        { expiresIn: "60 days" }
+      );
+      // Set a cookie and redirect to root
+      res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+      res.redirect('/');
+    });
+  }).catch((err) => {
+    console.log(err);
   });
 });

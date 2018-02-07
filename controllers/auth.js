@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 module.exports = (app) => {
 
@@ -5,4 +6,5 @@ module.exports = (app) => {
   app.get('/sign-up', (req, res) => {
     res.render('sign-up');
   });
+
 }
