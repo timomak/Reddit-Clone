@@ -7,4 +7,8 @@ module.exports = (app) => {
     res.render('sign-up');
   });
 
+  // LOGIN FORM
+  app.get('/login', (req, res) => {
+    res.render('login.handlebars');
+  });
 }

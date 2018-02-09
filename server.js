@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Required initializers
 var cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
@@ -97,12 +97,19 @@ app.post('/posts/:postId/comments', function (req, res) {
 })
 // SIGN UP POST
 app.post('/sign-up', (req, res) => {
+  var username = req.body.signupUsername;
+  var password = req.body.signupPassword;
   // Create User and JWT
-  var user = new User(req.body);
+  const user = new User({
+      username,
+      password
+    });
 
   user.save().then((user) => {
-      var token = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: "60 days" });
-      res.cookie('AUSTEN WANTS De COOKIE', token, { maxAge: 900000, httpOnly: true });
+      var token = jwt.sign({ _id: user._id }, process.env.SECRET, {
+        expiresIn: "60 days"
+      });
+      res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
       res.redirect('/');
   }).catch((err) => {
       console.log(err.message);
@@ -112,33 +119,30 @@ app.post('/sign-up', (req, res) => {
 
 // LOGOUT
 app.get('/logout', (req, res) => {
-  res.clearCookie('AUSTEN WANTS De COOKIE');
+  res.clearCookie('nToken');
   res.redirect('/');
-});
-
-// LOGIN FORM
-app.get('/login', (req, res) => {
-  res.render('login.handlebars');
 });
 
 // LOGIN
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  var username = req.body.username;
+  var password = req.body.password;
   // Find this user name
   User.findOne({ username }, 'username password').then((user) => {
     if (!user) {
       // User not found
-      return res.status(401).send({ message: 'Wrong Username or Password' });
+      return res.status(401).send({ message: 'No Such user' });
     }
     // Check the password
-    user.comparePassword(password, (err, isMatch) => {
+    bcrypt.compare(password, user.password, (err, isMatch) => {
       if (!isMatch) {
+        console.log("Is match: ",isMatch, "\n", "Error: ", err);
+        console.log("You Entered: ",password,'\n',"Correct password: ",user.password,'\n User Name: ', user.username );
         // Password does not match
-        return res.status(401).send({ message: "Wrong Username or password"});
+        return res.status(401).send({ message: "Wrong password"});
       }
       // Create a token
-      const token = jwt.sign(
+      var token = jwt.sign(
         { _id: user._id, username: user.username }, process.env.SECRET,
         { expiresIn: "60 days" }
       );
