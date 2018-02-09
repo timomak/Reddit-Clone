@@ -1,6 +1,6 @@
 <style>
 .navbar-header {
-margin-top: -30px;
+  margin-top: -30px;
 }
 </style>
 <nav class="navbar navbar-inverse">
@@ -18,8 +18,10 @@ margin-top: -30px;
               <li><a href="#">Hot</a></li>
               <li><a href="#">Trending</a></li>
               <li><a href="#">Fresh</a></li>
-              <li role="separator" class="divider"></li>
-              <li><a href="/posts/new">New Post</a></li>
+              {{#if currentUser}}
+                <li role="separator" class="divider"></li>
+                <li><a href="/posts/new">New Post</a></li>
+              {{/if}}
             </ul>
           </li>
         </ul>
@@ -32,22 +34,27 @@ margin-top: -30px;
 </form>
 
 <ul class="nav navbar-nav navbar-right">
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi, {{user.username}}<span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          <li><a href="#">Profile</a></li>
-          <li><a href="#">Settings</a></li>
-          <li><a href="#">Get Info</a></li>
-          <li role="separator" class="divider"></li>
-          <li><a href="#">Contact Us</a></li>
-        </ul>
-      </li>
+  {{#if currentUser}}
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi, {{username}}<span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#">Profile</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="#">Get Info</a></li>
+        <li role="separator" class="divider"></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </li>
+  {{/if}}
       <!-- <li><button type="button" class="btn btn-default navbar-btn">Sign in</button></li> -->
       <ul class="nav navbar-nav navbar-right">
-  <li><a href="/logout">Logout</a></li>
-  <li><a href="/login">Login</a></li>
-  <li><a href="/sign-up">Sign Up</a></li>
-</ul>
+        {{#if currentUser}}
+          <li><a href="/logout">Logout</a></li>
+        {{else}}
+          <li><a href="/login">Login</a></li>
+          <li><a href="/sign-up">Sign Up</a></li>
+        {{/if}}
+      </ul>
     </div>
   </div>
 </nav>

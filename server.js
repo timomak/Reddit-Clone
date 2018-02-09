@@ -21,6 +21,21 @@ var Comment = require('./models/comment');
 require('./controllers/auth.js')(app);
 var User = require('./models/user');
 
+// User logged Check
+var checkAuth = (req, res, next) => {
+  console.log("Checking authentication");
+  if (typeof req.cookies.nToken === 'undefined' || req.cookies.nToken === null) {
+    req.user = null;
+    console.log("Authentication was not successfull!");
+  } else {
+    var token = req.cookies.nToken;
+    var decodedToken = jwt.decode(token, { complete: true }) || {};
+    req.user = decodedToken.payload;
+    console.log("Authentication was successfull!");
+  }
+
+  next()
+}
 
 // Set up
 mongoose.Promise = global.Promise;
@@ -34,6 +49,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(checkAuth);
 
 Post.find({}).then((posts) => {
   res.render('posts-index.handlebars', { posts })
@@ -41,39 +57,51 @@ Post.find({}).then((posts) => {
   console.log(err.message);
 })
 
+// Create
 app.post('/posts', (req, res) => {
-  Post.create(req.body).then((post) => {
-    console.log(post);
-    res.redirect('/');
+  if (req.user) {
+    var post = new Post(req.body);
+
+    post.save(function (err, post) {
+      return res.redirect(`/`);
+    })
+  } else {
+    return res.status(401); // UNAUTHORIZED
+  }
+});
+// INDEX
+
+app.get('/', (req, res) => {
+  var currentUser = req.user;
+  var usernameNav = currentUser.username;
+
+  Post.find({}).then((posts) => {
+    console.log("username: ",usernameNav);
+    res.render('post-index', { posts, currentUser, usernameNav })
   }).catch((err) => {
     console.log(err.message);
-  })
+  });
 })
-// INDEX
-app.get('/', (req, res) => {
-  Post.find().then((posts) => {
-  res.render('post-index', { posts: posts});
-}).catch((err) => {
-  console.log(err);
-})
-})
-
 // SUBREDDIT
 app.get('/n/:subreddit', function(req, res) {
+  var currentUser = req.user;
   Post.find({ subreddit: req.params.subreddit }).then((posts) => {
-    res.render('post-subreddit.handlebars', { posts })
+    res.render('post-subreddit.handlebars', { posts, currentUser })
   }).catch((err) => {
     console.log(err)
   })
 });
 
 app.get('/posts/new', (req, res) => {
-  res.render('posts-new', {});
+  var currentUser = req.user;
+  res.render('posts-new', { currentUser });
 })
+
 app.get('/posts/:id', function (req, res) {
+  var currentUser = req.user;
   // LOOK UP THE POST
   Post.findById(req.params.id).populate('comments').then((post) => {
-    res.render('post-show.handlebars', { post})
+    res.render('post-show.handlebars', { post, currentUser})
   }).catch((err) => {
     console.log(err.message)
   })
@@ -130,6 +158,7 @@ app.post('/sign-up', (req, res) => {
 app.get('/logout', (req, res) => {
   res.clearCookie('nToken');
   res.redirect('/');
+
 });
 
 // LOGIN
