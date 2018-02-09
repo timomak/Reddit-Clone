@@ -53,7 +53,6 @@ app.post('/posts', (req, res) => {
 app.get('/', (req, res) => {
   Post.find().then((posts) => {
   res.render('post-index', { posts: posts});
-   console.log(req.cookies);
 }).catch((err) => {
   console.log(err);
 })
@@ -99,22 +98,32 @@ app.post('/posts/:postId/comments', function (req, res) {
 app.post('/sign-up', (req, res) => {
   var username = req.body.signupUsername;
   var password = req.body.signupPassword;
-  // Create User and JWT
-  const user = new User({
-      username,
-      password
-    });
+  var passwordCheck = req.body.signupConfirmPassword;
+  var remember = req.body.rememberMeCheck;
 
-  user.save().then((user) => {
-      var token = jwt.sign({ _id: user._id }, process.env.SECRET, {
-        expiresIn: "60 days"
+  if (password == passwordCheck) {
+    // Create User and JWT
+    const user = new User({
+        username,
+        password
       });
-      res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
-      res.redirect('/');
-  }).catch((err) => {
-      console.log(err.message);
-      return res.status(400).send({ err: err });
-    });
+
+    user.save().then((user) => {
+        var token = jwt.sign({ _id: user._id }, process.env.SECRET, {
+          expiresIn: "60 days"
+        });
+        if (remember == "yes") {
+          res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+        }
+        res.redirect('/');
+    }).catch((err) => {
+        console.log(err.message);
+        return res.status(400).send({ err: err });
+      });
+  }else {
+    console.log("Password doesn't match.");
+    res.redirect('/sign-up');
+  }
 });
 
 // LOGOUT
@@ -127,6 +136,7 @@ app.get('/logout', (req, res) => {
 app.post('/login', (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
+  var remember = req.body.remember;
   // Find this user name
   User.findOne({ username }, 'username password').then((user) => {
     if (!user) {
@@ -147,7 +157,9 @@ app.post('/login', (req, res) => {
         { expiresIn: "60 days" }
       );
       // Set a cookie and redirect to root
-      res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+      if (remember == "yes") {
+        res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+      }
       res.redirect('/');
     });
   }).catch((err) => {
