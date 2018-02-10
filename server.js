@@ -61,10 +61,18 @@ Post.find({}).then((posts) => {
 app.post('/posts', (req, res) => {
   if (req.user) {
     var post = new Post(req.body);
+    post.author = req.user._id
 
-    post.save(function (err, post) {
-      return res.redirect(`/`);
-    })
+    post.save().then((post) => {
+      return User.findById(req.user._id)
+    }).then((user) => {
+      user.posts.unshift(post);
+      user.save();
+      // REDIRECT TO THE NEW POST
+      res.redirect('/posts/'+ post._id)
+    }).catch((err) => {
+      console.log(err.message);
+    });
   } else {
     return res.status(401); // UNAUTHORIZED
   }
@@ -73,11 +81,9 @@ app.post('/posts', (req, res) => {
 
 app.get('/', (req, res) => {
   var currentUser = req.user;
-  var usernameNav = currentUser.username;
 
   Post.find({}).then((posts) => {
-    console.log("username: ",usernameNav);
-    res.render('post-index', { posts, currentUser, usernameNav })
+    res.render('post-index', { posts, currentUser })
   }).catch((err) => {
     console.log(err.message);
   });
@@ -109,15 +115,21 @@ app.get('/posts/:id', function (req, res) {
 // CREATE Comment
 app.post('/posts/:postId/comments', function (req, res) {
   // INSTANTIATE INSTANCE OF MODEL
-  const comment = new Comment(req.body)
+  var comment = new Comment(req.body);
+  comment.author = req.user._id
   // SAVE INSTANCE OF Comment MODEL TO DB
   comment.save().then((comment) => {
+    return User.findById(req.user._id)
+  }).then((user) => {
+    user.comments.unshift(comment);
+    user.save();
+  }).then((comment) => {
     return Post.findById(req.params.postId)
   }).then((post) => {
     post.comments.unshift(comment)
     return post.save()
   }).then((post) => {
-    res.redirect(`/`)
+    res.redirect(`/posts/`+ post._id)
   }).catch((err) => {
     console.log(err)
   })
@@ -141,7 +153,7 @@ app.post('/sign-up', (req, res) => {
           expiresIn: "60 days"
         });
         if (remember == "yes") {
-          res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+          res.cookie('nToken', token, { maxAge: 90000000, httpOnly: true });
         }
         res.redirect('/');
     }).catch((err) => {
@@ -187,7 +199,7 @@ app.post('/login', (req, res) => {
       );
       // Set a cookie and redirect to root
       if (remember == "yes") {
-        res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+        res.cookie('nToken', token, { maxAge: 90000000, httpOnly: true });
       }
       res.redirect('/');
     });

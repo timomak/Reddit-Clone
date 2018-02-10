@@ -2,11 +2,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 mongoose.Promise = global.Promise;
+
 const UserSchema = new Schema({
     username        : { type: String, required: true },
     password        : { type: String, select: false },
     createdAt       : { type: Date },
-    updatedAt       : { type: Date }
+    updatedAt       : { type: Date },
+    posts           : [{ type: Schema.Types.ObjectId, ref: 'Post' }],
+    comments        : [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
 });
 
 // Must use function here! ES6 => functions do not bind this!
