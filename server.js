@@ -91,8 +91,13 @@ app.get('/', (req, res) => {
 // SUBREDDIT
 app.get('/n/:subreddit', function(req, res) {
   var currentUser = req.user;
+  console.log("User-id: ", currentUser._id);
+  //Key to username on top
+
   Post.find({ subreddit: req.params.subreddit }).then((posts) => {
-    res.render('post-subreddit.handlebars', { posts, currentUser })
+    var subredditName = posts[0].subreddit;
+    console.log("subreddit name: ", subredditName);
+    res.render('post-subreddit.handlebars', { subredditName, posts, currentUser })
   }).catch((err) => {
     console.log(err)
   })
@@ -207,3 +212,40 @@ app.post('/login', (req, res) => {
     console.log(err);
   });
 });
+
+// USER PROFILE
+app.get('/users/:id', (req, res) => {
+  var currentUser = req.user;
+  // LOOK UP THE POST
+  User.findById(req.params.id).then((users) => {
+    console.log("username: ", users);
+    Post.findById(users.posts).then((posts) => {
+      res.render('user-index.handlebars', { users, posts, currentUser})
+  })}).catch((err) => {
+    console.log(err.message)
+  })
+})
+app.get('/username/:username', (req, res) => {
+  var currentUser = req.user;
+  var user;
+  User.find({username: req.params.username}).then((array) => {
+    user = array[0];
+    console.log("user: ", user);
+    User.findById(user._id).then((users) => {
+      console.log("users: ", users);
+      Post.findById(users.posts).then((posts) => {
+        console.log("posts: ", posts);
+        res.render('user-index.handlebars', {  users, posts, currentUser })
+      })
+    })
+  }).catch((err) => {
+    console.log(err)
+  })
+  // User.findById(username._id).then((users) => {
+  //   Post.findById(users.posts).then((posts) => {
+  //     res.render('user-index.handlebars', {  users, posts, currentUser })
+  //   })
+  // }).catch((err) => {
+  //   console.log(err)
+  // })
+})
