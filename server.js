@@ -80,42 +80,76 @@ app.post('/posts', (req, res) => {
 // INDEX
 
 app.get('/', (req, res) => {
-  var currentUser = req.user;
+  if (req.user) {
+    var currentUser = req.user;
 
-  Post.find({}).then((posts) => {
-    res.render('post-index', { posts, currentUser })
-  }).catch((err) => {
-    console.log(err.message);
-  });
+    User.findById(currentUser._id).then((currentUsername) => {
+      Post.find({}).then((posts) => {
+        res.render('post-index', { currentUsername, posts, currentUser })
+      })
+    }).catch((err) => {
+      console.log(err.message);
+    });
+  } else {
+    var currentUser = req.user;
+    Post.find({}).then((posts) => {
+      res.render('post-index', {  posts, currentUser })
+    }).catch((err) => {
+      console.log(err.message);
+    });
+  }
 })
 // SUBREDDIT
 app.get('/n/:subreddit', function(req, res) {
-  var currentUser = req.user;
-  console.log("User-id: ", currentUser._id);
-  //Key to username on top
-
-  Post.find({ subreddit: req.params.subreddit }).then((posts) => {
-    var subredditName = posts[0].subreddit;
-    console.log("subreddit name: ", subredditName);
-    res.render('post-subreddit.handlebars', { subredditName, posts, currentUser })
-  }).catch((err) => {
-    console.log(err)
-  })
+  if (req.user) {
+    var currentUser = req.user;
+    User.findById(currentUser._id).then((currentUsername) => {
+      Post.find({ subreddit: req.params.subreddit }).then((posts) => {
+        var subredditName = posts[0].subreddit;
+        console.log("subreddit name: ", subredditName);
+        res.render('post-subreddit.handlebars', { currentUsername, subredditName, posts, currentUser })
+      })
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    var currentUser = req.user;
+    Post.find({ subreddit: req.params.subreddit }).then((posts) => {
+      var subredditName = posts[0].subreddit;
+      res.render('post-subreddit.handlebars', { subredditName, posts, currentUser })
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
 });
 
 app.get('/posts/new', (req, res) => {
   var currentUser = req.user;
-  res.render('posts-new', { currentUser });
+  User.findById(currentUser._id).then((currentUsername) => {
+    res.render('posts-new', { currentUsername, currentUser });
+  })
 })
 
 app.get('/posts/:id', function (req, res) {
-  var currentUser = req.user;
-  // LOOK UP THE POST
-  Post.findById(req.params.id).populate('comments').then((post) => {
-    res.render('post-show.handlebars', { post, currentUser})
-  }).catch((err) => {
-    console.log(err.message)
-  })
+  if (req.user) {
+    var currentUser = req.user;
+    // LOOK UP THE POST
+    User.findById(currentUser._id).then((currentUsername) => {
+      Post.findById(req.params.id).populate('comments').then((post) => {
+        res.render('post-show.handlebars', { currentUsername, post, currentUser})
+      })
+    }).catch((err) => {
+      console.log(err.message)
+    })
+  } else {
+    var currentUser = req.user;
+    // LOOK UP THE POST
+    Post.findById(req.params.id).populate('comments').then((post) => {
+      res.render('post-show.handlebars', { post, currentUser})
+    }).catch((err) => {
+      console.log(err.message)
+    })
+  }
 })
 // CREATE Comment
 app.post('/posts/:postId/comments', function (req, res) {
@@ -214,38 +248,29 @@ app.post('/login', (req, res) => {
 });
 
 // USER PROFILE
-app.get('/users/:id', (req, res) => {
+// app.get('/users/:id', (req, res) => {
+//   var currentUser = req.user;
+//   // LOOK UP THE POST
+//   User.findById(req.params.id).then((users) => {
+//     console.log("username: ", users);
+//     Post.findById(users.posts).then((posts) => {
+//       res.render('user-index.handlebars', { users, posts, currentUser})
+//   })}).catch((err) => {
+//     console.log(err.message)
+//   })
+// })
+app.get('/users/:username', (req, res) => {
   var currentUser = req.user;
-  // LOOK UP THE POST
-  User.findById(req.params.id).then((users) => {
-    console.log("username: ", users);
-    Post.findById(users.posts).then((posts) => {
-      res.render('user-index.handlebars', { users, posts, currentUser})
-  })}).catch((err) => {
-    console.log(err.message)
-  })
-})
-app.get('/username/:username', (req, res) => {
-  var currentUser = req.user;
-  var user;
-  User.find({username: req.params.username}).then((array) => {
-    user = array[0];
-    console.log("user: ", user);
-    User.findById(user._id).then((users) => {
+  User.findById(currentUser._id).then((currentUsername) => {
+    User.find({username: req.params.username}).then((array) => {
+      var users = array[0];
       console.log("users: ", users);
       Post.findById(users.posts).then((posts) => {
         console.log("posts: ", posts);
-        res.render('user-index.handlebars', {  users, posts, currentUser })
+        res.render('user-index.handlebars', {  currentUsername, users, posts, currentUser })
       })
     })
   }).catch((err) => {
     console.log(err)
   })
-  // User.findById(username._id).then((users) => {
-  //   Post.findById(users.posts).then((posts) => {
-  //     res.render('user-index.handlebars', {  users, posts, currentUser })
-  //   })
-  // }).catch((err) => {
-  //   console.log(err)
-  // })
 })
