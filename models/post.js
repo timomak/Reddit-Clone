@@ -6,7 +6,7 @@ const PostSchema = new Schema({
   createdAt     :  { type: Date },
   updatedAt     :  { type: Date },
   author        :  { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  authorUsername:  { type: String },
+  authorUsername:  { type: String, required: true },
   title         :  { type: String, required: true },
   url           :  { type: String, required: true },
   summary       :  { type: String, required: true },
@@ -21,12 +21,6 @@ PostSchema.pre('save', (next) => {
   if (!this.createdAt) {
     this.createdAt = now
   }
-// console.log("this.author: ", this.author);
-//   User.findById(this.author).then((authorName) => {
-//     console.log("authorUsername: ", authorName);
-//     authorUsername = authorName.username;
-//   })
-
   next()
 })
 

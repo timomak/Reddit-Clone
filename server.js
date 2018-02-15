@@ -62,6 +62,9 @@ app.post('/posts', (req, res) => {
   if (req.user) {
     var post = new Post(req.body);
     post.author = req.user._id
+    console.log("author: ", req.user._id);
+    console.log("author Username: ", req.user.username);
+    post.authorUsername = req.user.username
 
     post.save().then((post) => {
       return User.findById(req.user._id)
@@ -156,6 +159,7 @@ app.post('/posts/:postId/comments', function (req, res) {
   // INSTANTIATE INSTANCE OF MODEL
   var comment = new Comment(req.body);
   comment.author = req.user._id
+  comment.authorUsername = req.user.username
   // SAVE INSTANCE OF Comment MODEL TO DB
   comment.save().then((comment) => {
     return User.findById(req.user._id)
@@ -248,24 +252,13 @@ app.post('/login', (req, res) => {
 });
 
 // USER PROFILE
-// app.get('/users/:id', (req, res) => {
-//   var currentUser = req.user;
-//   // LOOK UP THE POST
-//   User.findById(req.params.id).then((users) => {
-//     console.log("username: ", users);
-//     Post.findById(users.posts).then((posts) => {
-//       res.render('user-index.handlebars', { users, posts, currentUser})
-//   })}).catch((err) => {
-//     console.log(err.message)
-//   })
-// })
 app.get('/users/:username', (req, res) => {
   var currentUser = req.user;
   User.findById(currentUser._id).then((currentUsername) => {
     User.find({username: req.params.username}).then((array) => {
       var users = array[0];
       console.log("users: ", users);
-      Post.findById(users.posts).then((posts) => {
+      Post.find({authorUsername: req.params.username}).then((posts) => {
         console.log("posts: ", posts);
         res.render('user-index.handlebars', {  currentUsername, users, posts, currentUser })
       })
