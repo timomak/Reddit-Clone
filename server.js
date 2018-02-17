@@ -42,7 +42,7 @@ mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
-mongoose.connect('mongodb://localhost:27017/reddit-clone', { useMongoClient: true });
+mongoose.connect('mongodb://localhost:27017/reddit-clone');
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -62,7 +62,7 @@ app.post('/posts', (req, res) => {
   if (req.user) {
     var post = new Post(req.body);
     post.author = req.user._id
-    console.log("author: ", req.user._id);
+    console.log("author: ", req.user);
     console.log("author Username: ", req.user.username);
     post.authorUsername = req.user.username
 
@@ -80,8 +80,8 @@ app.post('/posts', (req, res) => {
     return res.status(401); // UNAUTHORIZED
   }
 });
-// INDEX
 
+// INDEX
 app.get('/', (req, res) => {
   if (req.user) {
     var currentUser = req.user;
@@ -126,6 +126,7 @@ app.get('/n/:subreddit', function(req, res) {
   }
 });
 
+// Page to Create New Post
 app.get('/posts/new', (req, res) => {
   var currentUser = req.user;
   User.findById(currentUser._id).then((currentUsername) => {
@@ -133,6 +134,7 @@ app.get('/posts/new', (req, res) => {
   })
 })
 
+// Post page
 app.get('/posts/:id', function (req, res) {
   if (req.user) {
     var currentUser = req.user;
@@ -154,12 +156,13 @@ app.get('/posts/:id', function (req, res) {
     })
   }
 })
+
 // CREATE Comment
 app.post('/posts/:postId/comments', function (req, res) {
   // INSTANTIATE INSTANCE OF MODEL
   var comment = new Comment(req.body);
-  comment.author = req.user._id
-  comment.authorUsername = req.user.username
+  var titleOfPost;
+
   // SAVE INSTANCE OF Comment MODEL TO DB
   comment.save().then((comment) => {
     return User.findById(req.user._id)
@@ -169,6 +172,8 @@ app.post('/posts/:postId/comments', function (req, res) {
   }).then((comment) => {
     return Post.findById(req.params.postId)
   }).then((post) => {
+    console.log("post title: ", post.title);
+    titleOfPost = post.title;
     post.comments.unshift(comment)
     return post.save()
   }).then((post) => {
@@ -176,6 +181,10 @@ app.post('/posts/:postId/comments', function (req, res) {
   }).catch((err) => {
     console.log(err)
   })
+  comment.author = req.user._id
+  comment.authorUsername = req.user.username
+  comment.postId = req.params.postId
+  comment.postTitle = titleOfPost
 })
 // SIGN UP POST
 app.post('/sign-up', (req, res) => {
@@ -192,7 +201,7 @@ app.post('/sign-up', (req, res) => {
       });
 
     user.save().then((user) => {
-        var token = jwt.sign({ _id: user._id }, process.env.SECRET, {
+        var token = jwt.sign({ _id: user._id, username: user.username  }, process.env.SECRET, {
           expiresIn: "60 days"
         });
         if (remember == "yes") {
@@ -258,12 +267,30 @@ app.get('/users/:username', (req, res) => {
     User.find({username: req.params.username}).then((array) => {
       var users = array[0];
       console.log("users: ", users);
+      console.log("users comments: ", users.comments);
       Post.find({authorUsername: req.params.username}).then((posts) => {
         console.log("posts: ", posts);
-        res.render('user-index.handlebars', {  currentUsername, users, posts, currentUser })
+        Comment.find({authorUsername: req.params.username}).then((comments) => {
+          console.log("comments: ", comments);
+          // Post.findById(comments[0].postId).then((post) => {
+          //   var postTitle = post.title;
+          //   console.log("post Title: ", postTitle);
+          res.render('user-index.handlebars', { comments, currentUsername, users, posts, currentUser })
+          // })
+        })
       })
     })
   }).catch((err) => {
     console.log(err)
   })
+})
+
+app.get('/profile', (req, res) => {
+  if (req.user) {
+    // var currentUser = req.user;
+    var currentUsername = req.user.username;
+    res.redirect(`/users/`+ currentUsername)
+  }else {
+    res.redirect('/')
+  }
 })
