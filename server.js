@@ -12,7 +12,7 @@ var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
 var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/rotten-potatoes');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/reddit-clone');
 
 const port = process.env.PORT || 27017;
 app.listen(port);
