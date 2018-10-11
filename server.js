@@ -45,11 +45,9 @@ mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
-<<<<<<< HEAD
 // mongoose.connect('mongodb://localhost:3000/reddit-clone-tm');
 // mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 // mongoose.set('debug', true)
-=======
 mongoose.connect('mongodb://localhost:27017/reddit-clone', { useMongoClient: true });
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
