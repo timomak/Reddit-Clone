@@ -7,12 +7,10 @@ var jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/reddit-clone-tm');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
-
-var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/reddit-clone');
 
 const port = process.env.PORT || 27017;
 app.listen(port);
