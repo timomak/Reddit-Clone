@@ -12,7 +12,7 @@ var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
-app.listen(process.env.PORT || 3000, function(){
+app.listen(process.env.PORT || 27017, function(){
   console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
 
