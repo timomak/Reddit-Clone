@@ -12,9 +12,7 @@ var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
-app.listen(process.env.PORT || 3000, function(){
-  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
-});
+
 
 // POST
 require('./controllers/posts.js')(app);
@@ -43,7 +41,7 @@ var checkAuth = (req, res, next) => {
 }
 
 // Set up
-// mongoose.Promise = global.Promise;
+mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
@@ -300,3 +298,7 @@ app.get('/profile', (req, res) => {
     res.redirect('/')
   }
 })
+
+app.listen(process.env.PORT || 3000, function(){
+  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
