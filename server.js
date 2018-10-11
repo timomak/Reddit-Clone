@@ -7,6 +7,7 @@ var jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/reddit-clone-tm');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
@@ -42,11 +43,11 @@ mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
-mongoose.connect('mongodb://localhost:27017/reddit-clone');
+// mongoose.connect('mongodb://localhost:27017/reddit-clone');
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
-app.listen(3000, () => console.log('It Loads on port 3000!'))
+// app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(checkAuth);
@@ -294,3 +295,5 @@ app.get('/profile', (req, res) => {
     res.redirect('/')
   }
 })
+const port = process.env.PORT || 3000;
+app.listen(port);
