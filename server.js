@@ -12,7 +12,9 @@ var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
-const port = process.env.PORT || 27017;
+app.listen(process.env.PORT || 3000, function(){
+  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
 
 // POST
 require('./controllers/posts.js')(app);
@@ -49,7 +51,7 @@ app.use(express.static('public'));
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
-app.listen(port);
+// app.listen(port);
 // app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
