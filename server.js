@@ -1,3 +1,5 @@
+// Everything is working thanks to Cenz
+
 // SECURITY
 require('dotenv').config();
 
