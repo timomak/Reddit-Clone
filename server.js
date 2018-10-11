@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/reddit-clone-tm');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/reddit-clone-tm');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
@@ -46,7 +46,7 @@ app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
 // mongoose.connect('mongodb://localhost:3000/reddit-clone-tm');
-// mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
+mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(port);
