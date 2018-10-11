@@ -12,7 +12,7 @@ var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
-app.listen(process.env.PORT || 27017, function(){
+app.listen(process.env.PORT || 3000, function(){
   console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
 
@@ -43,13 +43,13 @@ var checkAuth = (req, res, next) => {
 }
 
 // Set up
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 app.use(express.static('public'));
 // mongoose.connect('mongodb://localhost:3000/reddit-clone-tm');
-mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
-mongoose.set('debug', true)
+// mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
+// mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.listen(port);
 // app.listen(3000, () => console.log('It Loads on port 3000!'))
