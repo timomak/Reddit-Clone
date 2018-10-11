@@ -11,6 +11,12 @@ var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var bcrypt = require('bcrypt');
 
+var mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/rotten-potatoes');
+
+const port = process.env.PORT || 27017;
+app.listen(port);
+
 // POST
 require('./controllers/posts.js')(app);
 var Post = require('./models/post');
@@ -46,7 +52,7 @@ mongoose.connect('mongodb://localhost:27017/reddit-clone');
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'))
 mongoose.set('debug', true)
 app.use(bodyParser.urlencoded({ extended: true }));
-app.listen(3000, () => console.log('It Loads on port 3000!'))
+// app.listen(3000, () => console.log('It Loads on port 3000!'))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(checkAuth);
